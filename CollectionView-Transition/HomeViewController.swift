@@ -17,11 +17,14 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         createAndConfigureCollectionView()
     }
+}
 
+// MARK: - CollectionView and Cell Creation
+extension HomeViewController {
     func createAndConfigureCollectionView() {
         collectionView = UICollectionView(
             frame: view.bounds,
-            collectionViewLayout: UICollectionViewFlowLayout()
+            collectionViewLayout: createCompositionalLayout()
         )
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .systemBackground
@@ -52,8 +55,49 @@ class HomeViewController: UIViewController {
         cell.configure(with: vegetable)
         return cell
     }
+}
 
-    // MARK: - Data Source
+// MARK: - CollectionView CompositionalLayout
+extension HomeViewController {
+    func createCompositionalLayout() -> UICollectionViewLayout {
+        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+            let section = self.sections[sectionIndex]
+            return self.createVegetableSection(using: section)
+        }
+
+        let config = UICollectionViewCompositionalLayoutConfiguration()
+        config.interSectionSpacing = 20
+        layout.configuration = config
+        return layout
+    }
+
+    /// creates a section of our compositional layout
+    func createVegetableSection(using section: Section) -> NSCollectionLayoutSection {
+        // item size should be full size of its parent
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .fractionalHeight(1)
+        )
+
+        let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+
+        // width of group should fill parent, but height estimated to 350
+        let layoutGroupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .estimated(350)
+        )
+        let layoutGroup = NSCollectionLayoutGroup.horizontal(
+            layoutSize: layoutGroupSize,
+            subitems: [layoutItem]
+        )
+
+        let layoutSection = NSCollectionLayoutSection(group: layoutGroup)
+        return layoutSection
+    }
+}
+
+// MARK: - CollectionView Data Source
+extension HomeViewController {
     func createDataSource() {
         dataSource = UICollectionViewDiffableDataSource<Section, Vegetable>(
             collectionView: collectionView,
@@ -73,4 +117,5 @@ class HomeViewController: UIViewController {
         dataSource?.apply(snapshot)
     }
 }
+
 
