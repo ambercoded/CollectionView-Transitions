@@ -29,7 +29,8 @@ extension HomeViewController {
             frame: view.bounds,
             collectionViewLayout: twoColumnWaterfallLayout()
         )
-        collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        // collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        collectionView.autoresizingMask = [.flexibleWidth, .flexibleWidth] // waterfall
         collectionView.backgroundColor = .systemBackground
         view.addSubview(collectionView)
 
@@ -86,7 +87,7 @@ extension HomeViewController {
 
                 let items = self.currentSnapshot.itemIdentifiers
 
-                let totalHeight = items.reduce(0) { $0 + $1.weight }
+                let totalHeight = items.reduce(0) { $0 + CGFloat($1.weight) }
                 let columnHeight = CGFloat(totalHeight / 2.0)
 
                 // could get a bit fancier and balance the columns if they are too different height-wise -  here is just a simple take on this
