@@ -18,4 +18,11 @@ struct Section: Hashable {
         Section(id: 2, title: "Red", items: Vegetable.examplesRed),
         Section(id: 3, title: "Yellow", items: Vegetable.examplesYellow)
     ]
+
+    static let examplesMultiplied: [Section] =
+    [
+        Section(id: 1, title: "Green", items: Vegetable.examplesGreenMultiplied),
+        Section(id: 2, title: "Red", items: Vegetable.examplesRedMultiplied),
+        Section(id: 3, title: "Yellow", items: Vegetable.examplesYellowMultiplied)
+    ]
 }
