@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3A8B78F625DD22BA0084F38D /* SpringyCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8B78F525DD22BA0084F38D /* SpringyCollectionViewFlowLayout.swift */; };
 		9744F41225DBD70D005DD569 /* Vegetable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9744F41125DBD70D005DD569 /* Vegetable.swift */; };
 		9744F41525DBD9F9005DD569 /* SelfConfiguringCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9744F41425DBD9F9005DD569 /* SelfConfiguringCell.swift */; };
 		9744F41825DBDAAC005DD569 /* VegetableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9744F41725DBDAAC005DD569 /* VegetableCell.swift */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3A8B78F525DD22BA0084F38D /* SpringyCollectionViewFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpringyCollectionViewFlowLayout.swift; sourceTree = "<group>"; };
 		9744F41125DBD70D005DD569 /* Vegetable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vegetable.swift; sourceTree = "<group>"; };
 		9744F41425DBD9F9005DD569 /* SelfConfiguringCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfConfiguringCell.swift; sourceTree = "<group>"; };
 		9744F41725DBDAAC005DD569 /* VegetableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VegetableCell.swift; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 				977B136425DBD3250024136C /* SceneDelegate.swift */,
 				977B136625DBD3250024136C /* HomeViewController.swift */,
 				9744F41425DBD9F9005DD569 /* SelfConfiguringCell.swift */,
+				3A8B78F525DD22BA0084F38D /* SpringyCollectionViewFlowLayout.swift */,
 				9744F41725DBDAAC005DD569 /* VegetableCell.swift */,
 				977B137725DBD5610024136C /* Section.swift */,
 				9744F41125DBD70D005DD569 /* Vegetable.swift */,
@@ -154,6 +157,7 @@
 				977B137825DBD5610024136C /* Section.swift in Sources */,
 				9744F41225DBD70D005DD569 /* Vegetable.swift in Sources */,
 				977B136325DBD3250024136C /* AppDelegate.swift in Sources */,
+				3A8B78F625DD22BA0084F38D /* SpringyCollectionViewFlowLayout.swift in Sources */,
 				977B136525DBD3250024136C /* SceneDelegate.swift in Sources */,
 				9744F41525DBD9F9005DD569 /* SelfConfiguringCell.swift in Sources */,
 			);

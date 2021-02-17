@@ -13,9 +13,6 @@ class HomeViewController: UIViewController {
 
     var dataSource: UICollectionViewDiffableDataSource<Section, Vegetable>?
 
-    // required for waterfall layout
-    var currentSnapshot: NSDiffableDataSourceSnapshot<Section, Vegetable>!
-
     override func viewDidLoad() {
         super.viewDidLoad()
         createAndConfigureCollectionView()
@@ -27,11 +24,11 @@ extension HomeViewController {
     func createAndConfigureCollectionView() {
         collectionView = UICollectionView(
             frame: view.bounds,
-            collectionViewLayout: twoColumnWaterfallLayout()
+            collectionViewLayout: createSpringyLayout()
         )
-        // collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        collectionView.autoresizingMask = [.flexibleWidth, .flexibleWidth] // waterfall
+        collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .systemBackground
+        collectionView.delegate = self // springy
         view.addSubview(collectionView)
 
         collectionView.register(
@@ -61,6 +58,68 @@ extension HomeViewController {
     }
 }
 
+// MARK: - CollectionView Data Source
+extension HomeViewController {
+    func createDataSource() {
+        dataSource = UICollectionViewDiffableDataSource<Section, Vegetable>(
+            collectionView: collectionView,
+            cellProvider: { collectionView, indexPath, vegetable in
+                return self.configure(VegetableCell.self, with: vegetable, for: indexPath)
+            }
+        )
+    }
+
+    func reloadData() {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Vegetable>()
+        snapshot.appendSections(sections)
+
+        for section in sections {
+            snapshot.appendItems(section.items, toSection: section)
+        }
+
+        dataSource?.apply(snapshot)
+    }
+}
+
+
+// MARK: - SpringyLayout
+extension HomeViewController: UICollectionViewDelegateFlowLayout {
+    func createSpringyLayout() -> UICollectionViewFlowLayout {
+        let layout = SpringyCollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        return layout
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        // understanding index paths and sections:
+        // [0, 2] means section 1 and the third item in that section
+
+        let sectionIndex = indexPath.section
+        let section = sections[sectionIndex]
+
+        let itemIndex = indexPath.item
+        let item = section.items[itemIndex]
+
+        let itemWeightInGrams = item.weight
+        return CGSize(width: itemWeightInGrams, height: itemWeightInGrams)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+}
+
+// MARK: - CollectionView Delegate
+extension HomeViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print("tapped item at indexPath: \(indexPath)")
+    }
+}
+
 // MARK: - CollectionView CompositionalLayout
 extension HomeViewController {
     func createCompositionalLayout() -> UICollectionViewLayout {
@@ -74,57 +133,6 @@ extension HomeViewController {
         layout.configuration = config
         return layout
     }
-
-
-    func twoColumnWaterfallLayout() -> UICollectionViewLayout {
-            let sectionProvider = { [weak self] (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
-                guard let self = self else { return nil }
-
-                var leadingGroupHeight = CGFloat(0.0)
-                var trailingGroupHeight = CGFloat(0.0)
-                var leadingGroupItems = [NSCollectionLayoutItem]()
-                var trailingGroupItems = [NSCollectionLayoutItem]()
-
-                let items = self.currentSnapshot.itemIdentifiers
-
-                let totalHeight = items.reduce(0) { $0 + CGFloat($1.weight) }
-                let columnHeight = CGFloat(totalHeight / 2.0)
-
-                // could get a bit fancier and balance the columns if they are too different height-wise -  here is just a simple take on this
-
-                var runningHeight = CGFloat(0.0)
-                for index in 0..<self.currentSnapshot.numberOfItems {
-                    let item = items[index]
-                    let isLeading = runningHeight < columnHeight
-                    let layoutSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(CGFloat(item.weight)))
-                    let layoutItem = NSCollectionLayoutItem(layoutSize: layoutSize)
-
-                    runningHeight += CGFloat(item.weight)
-
-                    if isLeading {
-                        leadingGroupItems.append(layoutItem)
-                        leadingGroupHeight += CGFloat(item.weight)
-                    } else {
-                        trailingGroupItems.append(layoutItem)
-                        trailingGroupHeight += CGFloat(item.weight)
-                    }
-                }
-
-                let leadingGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .absolute(leadingGroupHeight))
-                let leadingGroup = NSCollectionLayoutGroup.vertical(layoutSize: leadingGroupSize, subitems:leadingGroupItems)
-
-                let trailingGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .absolute(trailingGroupHeight))
-                let trailingGroup = NSCollectionLayoutGroup.vertical(layoutSize: trailingGroupSize, subitems: trailingGroupItems)
-
-                let containerGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(max(leadingGroupHeight, trailingGroupHeight)))
-                let containerGroup = NSCollectionLayoutGroup.horizontal(layoutSize: containerGroupSize, subitems: [leadingGroup, trailingGroup])
-
-                let section = NSCollectionLayoutSection(group: containerGroup)
-                return section
-            }
-            let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
-            return layout
-        }
 
     /// creates a section of our compositional layout
     func createVegetableSection(using section: Section) -> NSCollectionLayoutSection {
@@ -153,28 +161,5 @@ extension HomeViewController {
 
 }
 
-// MARK: - CollectionView Data Source
-extension HomeViewController {
-    func createDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, Vegetable>(
-            collectionView: collectionView,
-            cellProvider: { collectionView, indexPath, vegetable in
-                return self.configure(VegetableCell.self, with: vegetable, for: indexPath)
-            }
-        )
-    }
-
-    func reloadData() {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Vegetable>()
-        snapshot.appendSections(sections)
-
-        for section in sections {
-            snapshot.appendItems(section.items, toSection: section)
-        }
-
-        currentSnapshot = snapshot // req for waterfall
-        dataSource?.apply(snapshot)
-    }
-}
 
 
