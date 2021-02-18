@@ -57,6 +57,7 @@ class SpringyCollectionViewFlowLayout: UICollectionViewFlowLayout {
             let currentlyVisible = self.visibleIndexPathsSet.contains(item.indexPath)
             return !currentlyVisible
         }
+        
         let touchLocation = self.collectionView?.panGestureRecognizer.location(in: self.collectionView)
 
         // add dynamic behavior to each newly visible item
