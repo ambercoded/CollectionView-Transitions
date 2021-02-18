@@ -47,6 +47,62 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3AC90A6725DE80F100309F36 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				977B136225DBD3250024136C /* AppDelegate.swift */,
+				977B136B25DBD3280024136C /* Assets.xcassets */,
+				977B136D25DBD3280024136C /* LaunchScreen.storyboard */,
+			);
+			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		3AC90A6825DE812000309F36 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				977B137725DBD5610024136C /* Section.swift */,
+				9744F41125DBD70D005DD569 /* Vegetable.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		3AC90A6925DE813A00309F36 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				977B136825DBD3250024136C /* Main.storyboard */,
+				977B136425DBD3250024136C /* SceneDelegate.swift */,
+				3AC90A6A25DE814A00309F36 /* Screens */,
+				3AC90A6B25DE815000309F36 /* Components */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		3AC90A6A25DE814A00309F36 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				3AC90A6C25DE817000309F36 /* Home */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		3AC90A6B25DE815000309F36 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				9744F41725DBDAAC005DD569 /* VegetableCell.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		3AC90A6C25DE817000309F36 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				977B136625DBD3250024136C /* HomeViewController.swift */,
+				3A8B78F525DD22BA0084F38D /* SpringyCollectionViewFlowLayout.swift */,
+				9744F41425DBD9F9005DD569 /* SelfConfiguringCell.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
 		977B135625DBD3250024136C = {
 			isa = PBXGroup;
 			children = (
@@ -66,17 +122,9 @@
 		977B136125DBD3250024136C /* CollectionView-Transition */ = {
 			isa = PBXGroup;
 			children = (
-				977B136225DBD3250024136C /* AppDelegate.swift */,
-				977B136425DBD3250024136C /* SceneDelegate.swift */,
-				977B136625DBD3250024136C /* HomeViewController.swift */,
-				9744F41425DBD9F9005DD569 /* SelfConfiguringCell.swift */,
-				3A8B78F525DD22BA0084F38D /* SpringyCollectionViewFlowLayout.swift */,
-				9744F41725DBDAAC005DD569 /* VegetableCell.swift */,
-				977B137725DBD5610024136C /* Section.swift */,
-				9744F41125DBD70D005DD569 /* Vegetable.swift */,
-				977B136825DBD3250024136C /* Main.storyboard */,
-				977B136B25DBD3280024136C /* Assets.xcassets */,
-				977B136D25DBD3280024136C /* LaunchScreen.storyboard */,
+				3AC90A6925DE813A00309F36 /* UI */,
+				3AC90A6825DE812000309F36 /* Model */,
+				3AC90A6725DE80F100309F36 /* Supporting Files */,
 				977B137025DBD3280024136C /* Info.plist */,
 			);
 			path = "CollectionView-Transition";
