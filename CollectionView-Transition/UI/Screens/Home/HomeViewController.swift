@@ -17,6 +17,11 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         createAndConfigureCollectionView()
     }
+
+    // only needed until i use tiling. else layout is not shown until invalidated by eg rotating
+    override func viewDidAppear(_ animated: Bool) {
+        collectionView.collectionViewLayout.invalidateLayout()
+    }
 }
 
 // MARK: - CollectionView and Cell Creation
@@ -24,7 +29,7 @@ extension HomeViewController {
     func createAndConfigureCollectionView() {
         collectionView = UICollectionView(
             frame: view.bounds,
-            collectionViewLayout: createSpringyLayout()
+            collectionViewLayout: createAnimatedLayout()
         )
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .systemBackground
@@ -84,8 +89,8 @@ extension HomeViewController {
 
 // MARK: - SpringyLayout
 extension HomeViewController: UICollectionViewDelegateFlowLayout {
-    func createSpringyLayout() -> UICollectionViewFlowLayout {
-        let layout = SpringyCollectionViewFlowLayout()
+    func createAnimatedLayout() -> UICollectionViewFlowLayout {
+        let layout = AnimatedCollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         return layout
     }
