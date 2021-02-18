@@ -65,7 +65,7 @@ class AnimatedCollectionViewFlowLayout: UICollectionViewFlowLayout {
             layoutAttributes.forEach { layoutAttribute in
                 let behavior = UISnapBehavior(item: layoutAttribute, snapTo: layoutAttribute.center)
                 //behavior.length = 0.0
-                behavior.damping = 1.0
+                behavior.damping = 0.5
                 //behavior.frequency = 1.0
                 self.dynamicAnimator.addBehavior(behavior)
             }
@@ -140,7 +140,8 @@ extension AnimatedCollectionViewFlowLayout {
         // thus: calculate new center and then replace the old center with the new.
         let yDistanceFromTouch = abs(touchPoint.y - behavior.snapPoint.y)
         let xDistanceFromTouch = abs(touchPoint.x - behavior.snapPoint.x)
-        let scrollResistance: CGFloat = (yDistanceFromTouch + xDistanceFromTouch) / 1000
+        let scrollResistance: CGFloat = (yDistanceFromTouch + xDistanceFromTouch) / 500
+        //let scrollResistance: CGFloat = 0.5
 
         // get the items center.
         let behaviorCenterRect = CGRect(x: behavior.snapPoint.x, y: behavior.snapPoint.y, width: 10, height: 10)
