@@ -64,19 +64,23 @@ class SpringyCollectionViewFlowLayout: UICollectionViewFlowLayout {
         {
             var center = item.center
             let springBehavior = UIAttachmentBehavior(item: item, attachedToAnchor: center)
+            //let springBehavior = UIAttachmentBehavior.slidingAttachment(with: item, attachmentAnchor: center, axisOfTranslation: CGVector(dx: 0, dy: 1))
             
             springBehavior.length = 1.0
-            springBehavior.damping = 0.5
-            springBehavior.frictionTorque = 100.0
-            springBehavior.frequency = 10.0
+            springBehavior.damping = 0.8
+            //springBehavior.frictionTorque = 100.0
+            //springBehavior.attachmentRange = UIFloatRange(minimum: -500, maximum: 500)
+            springBehavior.frequency = 1.0
+
 
             // calculate new center y coordinate for the item after dragging
             // intensity of animation depends on the items distance to the tap location
+
             if let touchLocation = touchLocation, CGPoint.zero != touchLocation
             {
                 let yDistanceFromTouch = abs(touchLocation.y - springBehavior.anchorPoint.y)
                 let xDistanceFromTouch = abs(touchLocation.x - springBehavior.anchorPoint.x)
-                let scrollResistance = (yDistanceFromTouch + xDistanceFromTouch) / 1500.0
+                let scrollResistance = (yDistanceFromTouch + xDistanceFromTouch) / 3500.0
                 
                 if self.latestDelta < 0.0
                 {
@@ -88,6 +92,8 @@ class SpringyCollectionViewFlowLayout: UICollectionViewFlowLayout {
                 }
                 item.center = center
             }
+
+
             self.dynamicAnimator.addBehavior(springBehavior)
             self.visibleIndexPathsSet.insert(item.indexPath)
         }
@@ -116,7 +122,7 @@ class SpringyCollectionViewFlowLayout: UICollectionViewFlowLayout {
             guard let springBehavior = springBehavior as? UIAttachmentBehavior, let touchLocation = touchLocation else { continue }
             let yDistanceFromTouch = abs(touchLocation.y - springBehavior.anchorPoint.y)
             let xDistanceFromTouch = abs(touchLocation.x - springBehavior.anchorPoint.x)
-            let scrollResistance: CGFloat = (yDistanceFromTouch + xDistanceFromTouch) / 1500.0
+            let scrollResistance: CGFloat = (yDistanceFromTouch + xDistanceFromTouch) / 3500.0
             
             guard let item = springBehavior.items.first as? UICollectionViewLayoutAttributes else { continue }
             var center = item.center
