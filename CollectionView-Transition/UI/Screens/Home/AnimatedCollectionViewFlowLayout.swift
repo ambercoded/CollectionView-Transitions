@@ -140,25 +140,32 @@ extension AnimatedCollectionViewFlowLayout {
         // thus: calculate new center and then replace the old center with the new.
         let yDistanceFromTouch = abs(touchPoint.y - behavior.snapPoint.y)
         let xDistanceFromTouch = abs(touchPoint.x - behavior.snapPoint.x)
-        let scrollResistance: CGFloat = (yDistanceFromTouch + xDistanceFromTouch) / 500
+        let scrollResistance: CGFloat = (yDistanceFromTouch + xDistanceFromTouch) / 200
         //let scrollResistance: CGFloat = 0.5
 
         // get the items center.
-        let behaviorCenterRect = CGRect(x: behavior.snapPoint.x, y: behavior.snapPoint.y, width: 10, height: 10)
+        let behaviorCenterRect = CGRect(x: behavior.snapPoint.x, y: behavior.snapPoint.y, width: 1, height: 1)
         if let dynamicItem = dynamicAnimator.items(in: behaviorCenterRect).first {
             var itemCenter = dynamicItem.center
 
+            let maximumShift: CGFloat = 7
+            let negativeMaximumShift = maximumShift * -1
+
             if scrollingDelta < 0 {
-                 itemCenter.y += max(scrollingDelta, scrollingDelta*scrollResistance)
-                //itemCenter.y += scrollingDelta
+                var amountOfYShift = max(scrollingDelta, scrollingDelta*scrollResistance)
+                if amountOfYShift < negativeMaximumShift { amountOfYShift = negativeMaximumShift }
+                //print(amountOfYShift)
+                itemCenter.y += amountOfYShift
                 // note that we clamp the product of the delta and scroll resistance
                 // by the delta in case the scroll resistance exceeds the delta
                 // (meaning the item might begin to move in the wrong direction).
                 // This is unlikely since we’re using such a high denominator (1500),
                 // but it’s something to watch out for in more bouncy collection view layouts.
             } else {
-                itemCenter.y += min(scrollingDelta, scrollingDelta*scrollResistance)
-                //itemCenter.y += scrollingDelta
+                var amountOfYShift = max(scrollingDelta, scrollingDelta*scrollResistance)
+                //print(amountOfYShift)
+                if amountOfYShift > maximumShift { amountOfYShift = maximumShift }
+                itemCenter.y += amountOfYShift
             }
 
             // change the items center
