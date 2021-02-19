@@ -10,7 +10,10 @@ import Foundation
 struct Vegetable: Hashable {
     let id: UUID
     let name: String
-    let weight: Double = Double.random(in: 40..<130)
+    let weight: Int = Int.random(in: 40..<130) // rotating
+
+    // SOLUTION!!! the bug happens when the size of an item is actually a number with a decimal value (double that has a decimal place. using Int resolves the problem.
+    //let weight: Double = 100 // no rotating
     var image: String {
         name
     }

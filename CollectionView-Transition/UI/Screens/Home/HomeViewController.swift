@@ -27,13 +27,16 @@ class HomeViewController: UIViewController {
 // MARK: - CollectionView and Cell Creation
 extension HomeViewController {
     func createAndConfigureCollectionView() {
+        let layout = createAnimatedLayout()
         collectionView = UICollectionView(
             frame: view.bounds,
-            collectionViewLayout: createAnimatedLayout()
+            collectionViewLayout: layout
         )
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .systemBackground
-        collectionView.delegate = self // springy
+        collectionView.delegate = self
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.showsHorizontalScrollIndicator = false
         view.addSubview(collectionView)
 
         collectionView.register(
@@ -89,32 +92,37 @@ extension HomeViewController {
 
 // MARK: - SpringyLayout
 extension HomeViewController: UICollectionViewDelegateFlowLayout {
-    func createAnimatedLayout() -> UICollectionViewFlowLayout {
-        let layout = AnimatedCollectionViewFlowLayout()
+    func createAnimatedLayout() -> AnimatedSlidingCollectionViewFlowLayout {
+        let layout = AnimatedSlidingCollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         return layout
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        // understanding index paths and sections:
-        // [0, 2] means section 1 and the third item in that section
+        let shouldUseVersionThatShowsBuggyBehavior = true
 
-        let sectionIndex = indexPath.section
-        let section = sections[sectionIndex]
+        if shouldUseVersionThatShowsBuggyBehavior {
+            let sectionIndex = indexPath.section
+            let section = sections[sectionIndex]
 
-        let itemIndex = indexPath.item
-        let item = section.items[itemIndex]
+            let itemIndex = indexPath.item
+            let item = section.items[itemIndex]
 
-        let itemWeightInGrams = item.weight
-        return CGSize(width: itemWeightInGrams, height: itemWeightInGrams)
+            let itemWeightInGrams = item.weight
+            return CGSize(width: itemWeightInGrams, height: itemWeightInGrams)
+        } else {
+            let size = 5 + indexPath.item * 4
+            return CGSize(width: size, height: size)
+        }
     }
 
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
+        return 10
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
+        return 10
     }
 }
 

@@ -65,7 +65,7 @@ class AnimatedCollectionViewFlowLayout: UICollectionViewFlowLayout {
             layoutAttributes.forEach { layoutAttribute in
                 let behavior = UISnapBehavior(item: layoutAttribute, snapTo: layoutAttribute.center)
                 //behavior.length = 0.0
-                behavior.damping = 0.5
+                behavior.damping = 0.4
                 //behavior.frequency = 1.0
                 self.dynamicAnimator.addBehavior(behavior)
             }
