@@ -17,14 +17,15 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
     var latestDelta: CGFloat = 0
 
     // animator parameters for bounciness
-    let maximumYAxisShift: CGFloat = 10.0
-    var negativeMaximumYAxisShift: CGFloat { maximumYAxisShift * -1 }
-    let scrollReactionResistance: CGFloat = 2000.0
+    let enableLimitForShiftOnYAxis = true
+    let yAxisShiftLimit: CGFloat = 2
+    var yAxisShiftLimitNegative: CGFloat { yAxisShiftLimit * -1 }
+    let scrollReactionResistance: CGFloat = 1500.0
 
     // spring parameters for bounciness
     let attachmentLength: CGFloat = 0.0
     let frictionTorque: CGFloat? = nil
-    let springDamping: CGFloat = 0.5
+    let springDamping: CGFloat = 0.8
     let oscillationFrequency: CGFloat = 1.0
 
     override func prepare() {
@@ -35,7 +36,7 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
         let visibleRect = CGRect(
             origin: self.collectionView?.bounds.origin ?? CGPoint.zero,
             size: self.collectionView?.frame.size ?? CGSize.zero
-        ).insetBy(dx: -0, dy: -0) // make it larger than the collectionView by 100
+        ).insetBy(dx: -100, dy: -100) // make it larger than the collectionView by 100
 
         // determine which items are visible
         let itemsInVisibleRectArray = super.layoutAttributesForElements(in: visibleRect) ?? []
@@ -43,8 +44,7 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
 
         /// find and remove all behaviors that are no longer visible
         // get all noLongerVisibleBehaviors
-        let noLongerVisibleBehaviors = self.dynamicAnimator.behaviors.filter
-        { behavior in
+        let noLongerVisibleBehaviors = self.dynamicAnimator.behaviors.filter { behavior in
             guard let behavior = behavior as? UIAttachmentBehavior else { return false }
             guard let attribute = behavior.items.first as? UICollectionViewLayoutAttributes else { return false }
             let currentlyVisible = itemsIndexPathsInVisibleRectSet.contains(attribute.indexPath)
@@ -52,8 +52,7 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
         }
 
         // remove all noLongerVisibleBehaviors
-        noLongerVisibleBehaviors.forEach
-            { behavior in
+        noLongerVisibleBehaviors.forEach { behavior in
                 self.dynamicAnimator.removeBehavior(behavior)
                 guard let behavior = behavior as? UIAttachmentBehavior else { return }
                 guard let attribute = behavior.items.first as? UICollectionViewLayoutAttributes else { return }
@@ -61,8 +60,7 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
         }
 
         // find all items that just became visible
-        let newlyVisibleItems = itemsInVisibleRectArray.filter
-        { item in
+        let newlyVisibleItems = itemsInVisibleRectArray.filter { item in
             let currentlyVisible = self.visibleIndexPathsSet.contains(item.indexPath)
             return !currentlyVisible
         }
@@ -70,39 +68,48 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
         let touchLocation = self.collectionView?.panGestureRecognizer.location(in: self.collectionView)
 
         // add dynamic behavior to each newly visible item
-        for item in newlyVisibleItems
-        {
-            var center = item.center
-            let springBehavior = UIAttachmentBehavior(item: item, attachedToAnchor: center)
-            //let springBehavior = UIAttachmentBehavior.slidingAttachment(with: item, attachmentAnchor: center, axisOfTranslation: CGVector(dx: 0, dy: 1))
+        for item in newlyVisibleItems {
+            // IMPORTANT! The center coordinate and needs to be rounded, else there are animation problems.
+            // thus, when setting the anchor and center, i have to make sure that it is rounded first, so that there is no rounding done when animating (which triggers unwanted 0.0000001 movement on the x-axis and triggers an oscillation)
+            // change item center to roundedCenter
+            var centerRounded = CGPoint(x: CGFloat.rounded(item.center.x)(), y: CGFloat.rounded(item.center.y)())
+            // i also have to round the center of the item itself when it is first layed out (not only the anchor)
+            if item.center != centerRounded {
+                item.center = centerRounded
+            }
 
+            // set spring anchor to ROUNDED Center. avoids that the animation engine rounds decimals which results
+            // in unwanted x and y "movement" and thus oscillation along the x-axis.
+            let springBehavior = UIAttachmentBehavior(item: item, attachedToAnchor: centerRounded)
+
+            // configure spring behavior
             springBehavior.length = attachmentLength
             springBehavior.damping = springDamping
             springBehavior.frequency = oscillationFrequency
             if let frictionTorque = frictionTorque {
                 springBehavior.frictionTorque = frictionTorque
             }
-            //springBehavior.attachmentRange = UIFloatRange(minimum: -500, maximum: 500)
 
             // calculate new center y coordinate for the item after dragging
             // intensity of animation depends on the items distance to the tap location
-
-            if let touchLocation = touchLocation, CGPoint.zero != touchLocation
-            {
+            if let touchLocation = touchLocation, CGPoint.zero != touchLocation {
                 let yDistanceFromTouch = abs(touchLocation.y - springBehavior.anchorPoint.y)
                 let xDistanceFromTouch = abs(touchLocation.x - springBehavior.anchorPoint.x)
                 let scrollResistance = (yDistanceFromTouch + xDistanceFromTouch) / scrollReactionResistance
 
                 if self.latestDelta < 0.0 {
                     var amountOfYShift = max(self.latestDelta, self.latestDelta * scrollResistance)
-                    if amountOfYShift < negativeMaximumYAxisShift { amountOfYShift = negativeMaximumYAxisShift }
-                    center.y += amountOfYShift
+                    let animationLimiterShouldKickIn = enableLimitForShiftOnYAxis && amountOfYShift < yAxisShiftLimitNegative
+                    if animationLimiterShouldKickIn { amountOfYShift = yAxisShiftLimitNegative }
+                    centerRounded.y += amountOfYShift
                 } else {
                     var amountOfYShift = min(self.latestDelta, self.latestDelta * scrollResistance)
-                    if amountOfYShift > maximumYAxisShift { amountOfYShift = maximumYAxisShift }
-                    center.y += amountOfYShift
+                    if enableLimitForShiftOnYAxis && amountOfYShift > yAxisShiftLimit {
+                        amountOfYShift = yAxisShiftLimit
+                    }
+                    centerRounded.y += amountOfYShift
                 }
-                item.center = center
+                item.center = centerRounded
             }
 
             self.dynamicAnimator.addBehavior(springBehavior)
@@ -110,19 +117,24 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
         }
     }
 
-    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]?
-    {
-        guard let attributes = self.dynamicAnimator.items(in: rect) as? [UICollectionViewLayoutAttributes] else { return nil }
-        return attributes
+    // MARK: - ANIMATION CALCULATION HELPER
+    func calculateAndApplyNewCenterCoordinateAfterDragging(for item: UIDynamicItem, with touchLocation: CGPoint) {
+
     }
 
-    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes?
-    {
+    func animationLimiterShouldKickIn() -> Bool {
+        return false
+    }
+
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        return self.dynamicAnimator.items(in: rect) as? [UICollectionViewLayoutAttributes]
+    }
+
+    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         return self.dynamicAnimator.layoutAttributesForCell(at: indexPath)
     }
 
-    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool
-    {
+    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         let scrollView = self.collectionView
         let delta = newBounds.origin.y - (scrollView?.bounds.origin.y ?? 0)
         self.latestDelta = delta
@@ -136,18 +148,24 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
             let scrollResistance: CGFloat = (yDistanceFromTouch + xDistanceFromTouch) / scrollReactionResistance
 
             guard let item = springBehavior.items.first as? UICollectionViewLayoutAttributes else { continue }
-            var center = item.center
+            //var center = item.center
+            var centerRounded = CGPoint(x: CGFloat.rounded(item.center.x)(), y: CGFloat.rounded(item.center.y)())
+
             if self.latestDelta < 0.0 {
                 var amountOfYShift = max(self.latestDelta, self.latestDelta * scrollResistance)
-                if amountOfYShift < negativeMaximumYAxisShift { amountOfYShift = negativeMaximumYAxisShift }
-                center.y += amountOfYShift
+                if enableLimitForShiftOnYAxis {
+                    if amountOfYShift < yAxisShiftLimitNegative { amountOfYShift = yAxisShiftLimitNegative }
+                }
+                centerRounded.y += amountOfYShift
             } else {
                 var amountOfYShift = min(self.latestDelta, self.latestDelta * scrollResistance)
-                if amountOfYShift > maximumYAxisShift { amountOfYShift = maximumYAxisShift }
-                center.y += amountOfYShift
+                if enableLimitForShiftOnYAxis {
+                    if amountOfYShift > yAxisShiftLimit { amountOfYShift = yAxisShiftLimit }
+                }
+                centerRounded.y += amountOfYShift
             }
 
-            item.center = center
+            item.center = centerRounded
             self.dynamicAnimator.updateItem(usingCurrentState: item)
         }
 

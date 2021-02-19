@@ -17,11 +17,6 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         createAndConfigureCollectionView()
     }
-
-    // only needed until i use tiling. else layout is not shown until invalidated by eg rotating
-    override func viewDidAppear(_ animated: Bool) {
-        collectionView.collectionViewLayout.invalidateLayout()
-    }
 }
 
 // MARK: - CollectionView and Cell Creation
@@ -99,23 +94,16 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let shouldUseVersionThatShowsBuggyBehavior = true
+        let sectionIndex = indexPath.section
+        let section = sections[sectionIndex]
 
-        if shouldUseVersionThatShowsBuggyBehavior {
-            let sectionIndex = indexPath.section
-            let section = sections[sectionIndex]
+        let itemIndex = indexPath.item
+        let item = section.items[itemIndex]
 
-            let itemIndex = indexPath.item
-            let item = section.items[itemIndex]
-
-            let itemWeightInGrams = item.weight
-            return CGSize(width: itemWeightInGrams, height: itemWeightInGrams)
-        } else {
-            let size = 5 + indexPath.item * 4
-            return CGSize(width: size, height: size)
-        }
+        let itemWeightInGrams = item.weight
+        //let roundedWeight = todo: use double again but round the values
+        return CGSize(width: itemWeightInGrams, height: itemWeightInGrams)
     }
-
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 10
@@ -157,7 +145,7 @@ extension HomeViewController {
 
         let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
         layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
-
+        
         // width of group should fill parent, but height estimated to 350
         let layoutGroupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
