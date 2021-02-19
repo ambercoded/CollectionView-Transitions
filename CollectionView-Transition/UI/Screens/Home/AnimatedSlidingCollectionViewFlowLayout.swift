@@ -17,8 +17,8 @@ class AnimatedSlidingCollectionViewFlowLayout: UICollectionViewFlowLayout {
     var latestDelta: CGFloat = 0
 
     // animator parameters for bounciness
-    let enableLimitForShiftOnYAxis = true
-    let yAxisShiftLimit: CGFloat = 2
+    let enableLimitForShiftOnYAxis = false
+    let yAxisShiftLimit: CGFloat = 5
     var yAxisShiftLimitNegative: CGFloat { yAxisShiftLimit * -1 }
     let scrollReactionResistance: CGFloat = 1500.0
 
